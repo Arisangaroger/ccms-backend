@@ -1,0 +1,49 @@
+{
+  "name": "ccms-backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "lint": "eslint \"src/**/*.{js.json}\" --fix",
+    "format": "prettier --write \"src/**/*.{js,json}\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Arisangaroger/ccms-backend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Arisangaroger/ccms-backend/issues"
+  },
+  "homepage": "https://github.com/Arisangaroger/ccms-backend#readme",
+  "description": "",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.52.0",
+    "@prisma/client": "^6.9.0",
+    "bcrypt": "^5.1.1",
+    "bcryptjs": "^2.4.3",
+    "cloudinary": "^1.41.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^4.18.2",
+    "helmet": "^7.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.15.1",
+    "multer": "^2.0.1",
+    "nodemailer": "^6.9.8",
+    "prisma": "^5.22.0",
+    "twilio": "^4.15.0",
+    "zod": "^3.25.51"
+  },
+  "devDependencies": {
+    "eslint": "^9.28.0",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-prettier": "^5.4.1",
+    "nodemon": "^3.1.10",
+    "prettier": "^3.5.3"
+  }
+}

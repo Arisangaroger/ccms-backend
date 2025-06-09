@@ -1,0 +1,212 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==========================
+// User Models
+// ==========================
+model Admin {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+}
+
+model Citizen {
+  id           String   @id @default(uuid())
+  nationalId   String   @unique
+  phone        String
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  complaints   Complaint[]
+}
+
+model Institution {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  complaints   Complaint[]
+  categories   CategoryInstitution[]
+  subcategories SubcategoryInstitution[]
+}
+
+model DistrictDepartment {
+  id           String   @id @default(uuid())
+  name         String
+  district     District @relation(fields: [districtId], references: [id])
+  districtId   String
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  districtComplaints DistrictComplaint[]
+}
+
+// ==========================
+// Geographical Models
+// ==========================
+model Province {
+  id    String    @id @default(uuid())
+  name  String
+  districts District[]
+}
+
+model District {
+  id         String    @id @default(uuid())
+  name       String
+  province   Province  @relation(fields: [provinceId], references: [id])
+  provinceId String
+  departments DistrictDepartment[]
+}
+
+// ==========================
+// Complaint Models
+// ==========================
+model Complaint {
+  id             String     @id @default(uuid())
+  title          String
+  description    String
+  citizen        Citizen    @relation(fields: [citizenId], references: [id])
+  citizenId      String
+  category       Category   @relation(fields: [categoryId], references: [id])
+  categoryId     String
+  subcategory    Subcategory? @relation(fields: [subcategoryId], references: [id])
+  subcategoryId  String?
+  province       Province   @relation(fields: [provinceId], references: [id])
+  provinceId     String
+  district       District   @relation(fields: [districtId], references: [id])
+  districtId     String
+  institution    Institution @relation(fields: [institutionId], references: [id])
+  institutionId  String
+  status         String
+  submittedAt    DateTime
+  resolvedAt     DateTime?
+  deadline       DateTime?
+  resolutionNotes String?
+  uploadedFiles  UploadedFile[]
+  notifications  Notification[]
+  messages       InstitutionDistrictMessage[]
+  performance    ComplaintPerformance?
+  districtComplaints DistrictComplaint[]
+}
+
+// ==========================
+// Category & Institution Linking
+// ==========================
+model Category {
+  id          String   @id @default(uuid())
+  name        String
+  description String
+  createdAt   DateTime @default(now())
+  subcategories Subcategory[]
+  complaints  Complaint[]
+  institutions CategoryInstitution[]
+}
+
+model Subcategory {
+  id          String   @id @default(uuid())
+  name        String
+  category    Category @relation(fields: [categoryId], references: [id])
+  categoryId  String
+  createdAt   DateTime @default(now())
+  complaints  Complaint[]
+  institutions SubcategoryInstitution[]
+}
+
+model CategoryInstitution {
+  id            String      @id @default(uuid())
+  category      Category    @relation(fields: [categoryId], references: [id])
+  categoryId    String
+  institution   Institution @relation(fields: [institutionId], references: [id])
+  institutionId String
+}
+
+model SubcategoryInstitution {
+  id            String      @id @default(uuid())
+  subcategory   Subcategory @relation(fields: [subcategoryId], references: [id])
+  subcategoryId String
+  institution   Institution @relation(fields: [institutionId], references: [id])
+  institutionId String
+}
+
+// ==========================
+// File Uploads
+// ==========================
+model UploadedFile {
+  id           String     @id @default(uuid())
+  complaint    Complaint  @relation(fields: [complaintId], references: [id])
+  complaintId  String
+  fileUrl      String
+  fileType     String
+  uploadedAt   DateTime   @default(now())
+}
+
+// ==========================
+// Notifications
+// ==========================
+model Notification {
+  id          String     @id @default(uuid())
+  userId      String
+  complaint   Complaint  @relation(fields: [complaintId], references: [id])
+  complaintId String
+  message     String
+  sentAt      DateTime   @default(now())
+}
+
+// ==========================
+// Institution ↔ District Messaging
+// ==========================
+model InstitutionDistrictMessage {
+  id          String     @id @default(uuid())
+  fromId      String     // Institution ID
+  toId        String     // DistrictDepartment ID
+  complaint   Complaint  @relation(fields: [complaintId], references: [id])
+  complaintId String
+  message     String
+  sentAt      DateTime   @default(now())
+}
+
+// ==========================
+// District Complaint Handling
+// ==========================
+model DistrictComplaint {
+  id                   String            @id @default(uuid())
+  complaint            Complaint         @relation(fields: [complaintId], references: [id])
+  complaintId          String
+  districtDepartment   DistrictDepartment @relation(fields: [districtDepartmentId], references: [id])
+  districtDepartmentId String
+  internalDeadline     DateTime
+  acknowledged         Boolean           @default(false)
+  status               String
+  internalNotes        String?
+  assignedStaff        String?
+}
+
+// ==========================
+// Performance & Audit
+// ==========================
+model ComplaintPerformance {
+  id                      String     @id @default(uuid())
+  institutionId           String
+  complaint               Complaint  @relation(fields: [complaintId], references: [id])
+  complaintId             String
+  resolvedBeforeDeadline  Boolean
+  resolutionTime          Int        // Minutes or seconds
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String
+  action    String
+  entity    String
+  entityId  String
+  timestamp DateTime @default(now())
+  details   Json
+}
